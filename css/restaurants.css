@@ -1,0 +1,127 @@
+/* Restaurant Grid */
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  padding: 15px 0;
+}
+
+/* Restaurant Card */
+.restaurant-card {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 15px;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Closed state */
+.restaurant-card.closed {
+  opacity: 0.6;
+  filter: grayscale(30%);
+  cursor: not-allowed;
+}
+
+/* Image wrapper */
+.restaurant-image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+}
+
+/* Circular profile picture - bigger */
+.restaurant-profile-pic {
+  width: 90%;
+  max-width: 160px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #eee;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.restaurant-card:hover .restaurant-profile-pic {
+  transform: scale(1.12);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+/* Card body */
+.restaurant-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.restaurant-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.restaurant-meta {
+  font-size: 0.85rem;
+  color: #777;
+  margin-bottom: 6px;
+}
+
+.open-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 6px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.open-badge.open {
+  background: #e6f9f0;
+  color: #0a8f5a;
+}
+
+.open-badge.closed {
+  background: #fdecea;
+  color: #d93025;
+}
+
+/* Rating stars */
+.restaurant-rating {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #f5b50a; /* gold stars */
+}
+
+/* Responsive scaling */
+@media (max-width: 1200px) {
+  .restaurant-profile-pic { max-width: 140px; }
+}
+
+@media (max-width: 992px) {
+  .restaurant-profile-pic { max-width: 130px; }
+  .restaurant-name { font-size: 0.95rem; }
+}
+
+@media (max-width: 768px) {
+  .restaurant-profile-pic { max-width: 110px; }
+  .restaurant-name { font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+  .restaurant-profile-pic { max-width: 90px; }
+  .restaurant-name { font-size: 0.85rem; }
+}
