@@ -1933,6 +1933,98 @@ if (isset($_SESSION['user_location'])) {
   border-radius: 2px;
 }
 
+/* ================= ALL RESTAURANTS SECTION ================= */
+.all-restaurants-section {
+  margin: 40px 0;
+}
+
+.all-restaurants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--gray-light);
+}
+
+.all-restaurants-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.all-restaurants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.all-restaurants-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.all-restaurants-skeleton-card {
+  background: var(--gray-light);
+  border-radius: 12px;
+  height: 220px;
+  animation: all-restaurants-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes all-restaurants-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.all-restaurants-card-wrap {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.all-restaurants-card-wrap.closed {
+  opacity: 0.7;
+  filter: grayscale(25%);
+}
+
+.all-restaurants-card-wrap.closed .all-restaurants-card-link {
+  pointer-events: none;
+  cursor: default;
+}
+
+.all-restaurants-closed-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  text-align: center;
+  padding: 20px;
+  z-index: 2;
+}
+
+.all-restaurants-closed-overlay strong {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.all-restaurants-closed-overlay span {
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
 .view-all-btn {
   background: var(--white);
   color: var(--primary);
@@ -3403,10 +3495,6 @@ if (isset($_SESSION['user_location'])) {
         <i class="fas fa-star"></i>
         Recommended For You
       </h2>
-      <button class="refresh-recommended-btn" id="refreshRecommended">
-        <i class="fas fa-redo"></i>
-        Refresh
-      </button>
     </div>
     
     <!-- Swiper Container for Recommended Foods -->
@@ -3424,10 +3512,6 @@ if (isset($_SESSION['user_location'])) {
         <i class="fas fa-dice"></i>
         10 Random Pick For You
       </h2>
-      <button class="refresh-random-btn" id="refreshRandom">
-        <i class="fas fa-redo"></i>
-        Refresh Picks
-      </button>
     </div>
     
     <!-- Swiper Container for Random Foods -->
@@ -3446,9 +3530,6 @@ if (isset($_SESSION['user_location'])) {
         Sulit Meals (₱150 & below)
       </h2>
       <div style="display: flex; gap: 10px; align-items: center;">
-        <button class="refresh-nearby-btn" id="refreshSulit">
-          <i class="fas fa-redo"></i> Refresh
-        </button>
         <a href="sulit-meals.php" class="view-all-btn">
           <i class="fas fa-eye"></i> View All
         </a>
@@ -3461,6 +3542,31 @@ if (isset($_SESSION['user_location'])) {
         <div class="swiper-wrapper" id="sulitSwiperWrapper"></div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
+      </div>
+    </div>
+
+    <!-- ================= ALL RESTAURANTS SECTION ================= -->
+    <div class="all-restaurants-section">
+      <div class="all-restaurants-header">
+        <h2 class="all-restaurants-title">
+          <i class="fas fa-store"></i>
+          All Restaurants
+        </h2>
+        <a href="foods/categories.php" class="view-all-btn">
+          <i class="fas fa-eye"></i> View All
+        </a>
+      </div>
+      <div id="allRestaurantsContainer" class="all-restaurants-grid">
+        <div id="allRestaurantsSkeleton" class="all-restaurants-skeleton">
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+        </div>
       </div>
     </div>
     </div>
@@ -5967,6 +6073,96 @@ async function loadTopRestaurants() {
   }
 }
 
+// ================= LOAD ALL RESTAURANTS =================
+async function loadAllRestaurants() {
+  const container = document.getElementById('allRestaurantsContainer');
+  const skeleton = document.getElementById('allRestaurantsSkeleton');
+  if (!container) return;
+
+  try {
+    const vendorsSnapshot = await db.collection("vendors")
+      .where("reststatus", "==", true)
+      .get();
+
+    if (skeleton) skeleton.remove();
+
+    if (vendorsSnapshot.empty) {
+      container.innerHTML = `
+        <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
+          <i class="fas fa-store fa-2x" style="color: var(--gray-light); margin-bottom: 15px;"></i>
+          <h3 style="color: var(--secondary); margin-bottom: 8px;">No restaurants found</h3>
+          <p style="color: var(--gray);">Check back later for new restaurants.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const vendors = [];
+    vendorsSnapshot.forEach(doc => {
+      vendors.push({ id: doc.id, ...doc.data() });
+    });
+
+    container.innerHTML = '';
+    vendors.forEach(vendor => {
+      const wrap = document.createElement('div');
+      wrap.className = 'all-restaurants-card-wrap';
+      if (vendor.isOpen === false) wrap.classList.add('closed');
+
+      const reviewsCount = vendor.reviewsCount || 0;
+      const reviewsSum = vendor.reviewsSum || 0;
+      const rating = reviewsCount > 0
+        ? (reviewsSum / reviewsCount).toFixed(1)
+        : '0.0';
+      const photo = vendor.photo || vendor.logo ||
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+      const title = vendor.title || 'Restaurant';
+      const category = vendor.categoryTitle || vendor.category || 'Restaurant';
+      const isOpen = vendor.isOpen !== false;
+      const nextOpenAt = vendor.nextOpenAt || '';
+
+      let overlayHTML = '';
+      if (!isOpen) {
+        overlayHTML = `
+          <div class="all-restaurants-closed-overlay">
+            <strong>Temporarily Closed</strong>
+            ${nextOpenAt ? `<span>${nextOpenAt}</span>` : ''}
+          </div>
+        `;
+      }
+
+      wrap.innerHTML = `
+        ${overlayHTML}
+        <a href="users/vendor.php?id=${vendor.id}" class="all-restaurants-card-link" style="display: block; text-decoration: none; color: inherit;">
+          <div class="restaurant-image-wrapper" style="margin-top: 12px;">
+            <img src="${photo}" alt="${title}" class="restaurant-profile-pic" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+          </div>
+          <div class="restaurant-body">
+            <div class="restaurant-name">${title}</div>
+            <div class="restaurant-meta">${category}</div>
+            <span class="open-badge ${isOpen ? 'open' : 'closed'}">${isOpen ? 'Open' : 'Closed'}</span>
+            <div class="restaurant-rating">
+              <div class="rating-stars">${generateStarRating(parseFloat(rating))}</div>
+              <span class="rating-value">${rating}</span>
+              <span class="rating-count">(${reviewsCount})</span>
+            </div>
+          </div>
+        </a>
+      `;
+      container.appendChild(wrap);
+    });
+  } catch (error) {
+    console.error('Error loading all restaurants:', error);
+    if (skeleton) skeleton.remove();
+    container.innerHTML = `
+      <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
+        <i class="fas fa-exclamation-circle fa-2x" style="color: var(--gray-light); margin-bottom: 15px;"></i>
+        <h3 style="color: var(--secondary); margin-bottom: 8px;">Error loading restaurants</h3>
+        <p style="color: var(--gray);">Please try again later.</p>
+      </div>
+    `;
+  }
+}
 
 // ================= CREATE RESTAURANT CARD =================
 async function createRestaurantCard(restaurant, container, type) {
@@ -6262,6 +6458,9 @@ async function loadAllSections() {
   
   // Load user favorites
   await loadUserFavorites();
+  
+  // Load all restaurants (below Sulit Meals)
+  await loadAllRestaurants();
 }
 
 // ================= UPDATE INITIALIZATION =================
@@ -6755,66 +6954,6 @@ function showNoSulitResults(message = null) {
 
 // ================= SETUP REFRESH BUTTONS =================
 function setupRefreshButtons() {
-  // Random refresh button
-  const refreshRandomBtn = document.getElementById('refreshRandom');
-  if (refreshRandomBtn) {
-    refreshRandomBtn.addEventListener('click', async function() {
-      const originalHTML = refreshRandomBtn.innerHTML;
-      refreshRandomBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-      refreshRandomBtn.disabled = true;
-      
-      // Clear restaurant cache
-      restaurantCache = {};
-      
-      await loadRandomFoods();
-      
-      refreshRandomBtn.innerHTML = originalHTML;
-      refreshRandomBtn.disabled = false;
-      
-      showNotification('Random picks refreshed!', 'success');
-    });
-  }
-  
-  // Recommended refresh button
-  const refreshRecommendedBtn = document.getElementById('refreshRecommended');
-  if (refreshRecommendedBtn) {
-    refreshRecommendedBtn.addEventListener('click', async function() {
-      const originalHTML = refreshRecommendedBtn.innerHTML;
-      refreshRecommendedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-      refreshRecommendedBtn.disabled = true;
-      
-      // Clear restaurant cache
-      restaurantCache = {};
-      
-      await loadRecommendedFoods();
-      
-      refreshRecommendedBtn.innerHTML = originalHTML;
-      refreshRecommendedBtn.disabled = false;
-      
-      showNotification('Recommendations refreshed!', 'success');
-    });
-  }
-  
-  // Sulit meals refresh button (if you have one, otherwise add it to your HTML)
-  const refreshSulitBtn = document.getElementById('refreshSulit');
-  if (refreshSulitBtn) {
-    refreshSulitBtn.addEventListener('click', async function() {
-      const originalHTML = refreshSulitBtn.innerHTML;
-      refreshSulitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-      refreshSulitBtn.disabled = true;
-      
-      // Clear restaurant cache
-      restaurantCache = {};
-      
-      await loadSulitMeals();
-      
-      refreshSulitBtn.innerHTML = originalHTML;
-      refreshSulitBtn.disabled = false;
-      
-      showNotification('Sulit meals refreshed!', 'success');
-    });
-  }
-  
   // Nearby restaurants refresh button
   const refreshNearbyRestaurantsBtn = document.getElementById('refreshNearbyRestaurants');
   if (refreshNearbyRestaurantsBtn) {
