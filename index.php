@@ -1933,6 +1933,98 @@ if (isset($_SESSION['user_location'])) {
   border-radius: 2px;
 }
 
+/* ================= ALL RESTAURANTS SECTION ================= */
+.all-restaurants-section {
+  margin: 40px 0;
+}
+
+.all-restaurants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--gray-light);
+}
+
+.all-restaurants-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.all-restaurants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.all-restaurants-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.all-restaurants-skeleton-card {
+  background: var(--gray-light);
+  border-radius: 12px;
+  height: 220px;
+  animation: all-restaurants-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes all-restaurants-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.all-restaurants-card-wrap {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.all-restaurants-card-wrap.closed {
+  opacity: 0.7;
+  filter: grayscale(25%);
+}
+
+.all-restaurants-card-wrap.closed .all-restaurants-card-link {
+  pointer-events: none;
+  cursor: default;
+}
+
+.all-restaurants-closed-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  text-align: center;
+  padding: 20px;
+  z-index: 2;
+}
+
+.all-restaurants-closed-overlay strong {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.all-restaurants-closed-overlay span {
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
 .view-all-btn {
   background: var(--white);
   color: var(--primary);
@@ -3396,73 +3488,6 @@ if (isset($_SESSION['user_location'])) {
       </div>
     </div>
     <?php endif; ?>
-    
-    <!-- ================= NEARBY FOODS SECTION ================= -->
-    <div class="nearby-section-header">
-      <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-        <h2 class="nearby-section-title">
-          <i class="fas fa-map-marker-alt"></i>
-          Nearby Foods
-        </h2>
-        
-        <?php if ($hasSavedLocation && $isLoggedIn): ?>
-        <div class="saved-location-badge">
-          <i class="fas fa-check-circle"></i>
-          <span>Your Location</span>
-        </div>
-        <?php endif; ?>
-      </div>
-      
-      <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: space-between; width: 100%; margin-top: 10px;">
-        <div class="location-info" onclick="showLocationModal()">
-          <i class="fas fa-location-dot"></i>
-          <span id="locationText">
-            <?php 
-            if ($hasSavedLocation && !empty($userAddress)) {
-                // Show address name if available
-                echo htmlspecialchars($userAddress);
-            } elseif ($hasSavedLocation) {
-                // Show generic text instead of coordinates
-                echo 'Your Saved Location';
-            } else {
-                echo 'Set your location';
-            }
-            ?>
-          </span>
-          <button class="change-location-btn" onclick="event.stopPropagation(); showLocationModal();">
-            <i class="fas fa-pencil-alt"></i> Change
-          </button>
-        </div>
-        
-        <div style="display: flex; gap: 10px;">
-          <button class="refresh-nearby-btn" id="refreshNearby">
-            <i class="fas fa-redo"></i>
-            Refresh Nearby
-          </button>
-          
-          <?php if ($isLoggedIn && $hasSavedLocation): ?>
-          <button class="save-location-btn" onclick="saveLocationToFirebase()" id="saveLocationBtn">
-            <i class="fas fa-save"></i>
-            Save to Profile
-          </button>
-          <?php endif; ?>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Food Category Icons Row -->
-    <div id="foodCategoryIcons" class="food-category-icons" style="margin-top: 20px;">
-      <!-- Category icons will be loaded by JavaScript -->
-    </div>
-    
-    <!-- Swiper Container for Nearby Foods -->
-    <div class="swiper-nearby-container">
-      <div class="swiper mySwiperNearby">
-        <div class="swiper-wrapper" id="nearbySwiperWrapper"></div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
-      </div>
-    </div>
 
     <!-- ================= RECOMMENDED FOR YOU SECTION ================= -->
     <div class="recommended-section-header">
@@ -3470,10 +3495,6 @@ if (isset($_SESSION['user_location'])) {
         <i class="fas fa-star"></i>
         Recommended For You
       </h2>
-      <button class="refresh-recommended-btn" id="refreshRecommended">
-        <i class="fas fa-redo"></i>
-        Refresh
-      </button>
     </div>
     
     <!-- Swiper Container for Recommended Foods -->
@@ -3491,10 +3512,6 @@ if (isset($_SESSION['user_location'])) {
         <i class="fas fa-dice"></i>
         10 Random Pick For You
       </h2>
-      <button class="refresh-random-btn" id="refreshRandom">
-        <i class="fas fa-redo"></i>
-        Refresh Picks
-      </button>
     </div>
     
     <!-- Swiper Container for Random Foods -->
@@ -3513,9 +3530,6 @@ if (isset($_SESSION['user_location'])) {
         Sulit Meals (₱150 & below)
       </h2>
       <div style="display: flex; gap: 10px; align-items: center;">
-        <button class="refresh-nearby-btn" id="refreshSulit">
-          <i class="fas fa-redo"></i> Refresh
-        </button>
         <a href="sulit-meals.php" class="view-all-btn">
           <i class="fas fa-eye"></i> View All
         </a>
@@ -3528,6 +3542,31 @@ if (isset($_SESSION['user_location'])) {
         <div class="swiper-wrapper" id="sulitSwiperWrapper"></div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
+      </div>
+    </div>
+
+    <!-- ================= ALL RESTAURANTS SECTION ================= -->
+    <div class="all-restaurants-section">
+      <div class="all-restaurants-header">
+        <h2 class="all-restaurants-title">
+          <i class="fas fa-store"></i>
+          All Restaurants
+        </h2>
+        <a href="foods/categories.php" class="view-all-btn">
+          <i class="fas fa-eye"></i> View All
+        </a>
+      </div>
+      <div id="allRestaurantsContainer" class="all-restaurants-grid">
+        <div id="allRestaurantsSkeleton" class="all-restaurants-skeleton">
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+          <div class="all-restaurants-skeleton-card"></div>
+        </div>
       </div>
     </div>
     </div>
@@ -3554,18 +3593,14 @@ if (isset($_SESSION['user_location'])) {
 // ================= GLOBAL VARIABLES =================
 let allFoodItems = [];
 let randomProducts = [];
-let nearbyProducts = [];
 let sulitProducts = [];
 let randomSwiper;
-let nearbySwiper;
 let sulitSwiper;
 let recommendedProducts = [];
 let recommendedSwiper;
 const RECOMMENDED_LIMIT = 10;
 const RANDOM_LIMIT = 10;
-const NEARBY_LIMIT = 10;
 const SULIT_LIMIT = 10;
-const MAX_DISTANCE_KM = 10;
 const SULIT_PRICE_LIMIT = 150;
 
 // Advertisement variables
@@ -5056,9 +5091,7 @@ function closeLocationModal() {
 function closeLocationModalAndRefresh() {
   closeLocationModal();
   updateLocationDisplay();
-  loadNearbyFoods(); // Reload nearby foods with new location
   
-  // Trigger location update event for restaurant sections
   const event = new Event('locationUpdated');
   document.dispatchEvent(event);
   
@@ -5100,9 +5133,6 @@ async function loadAllSections() {
   
   // Load categories from Firebase
   await loadCategories();
-  
-  // Load nearby foods
-  await loadNearbyFoods();
   
   // Load sulit meals
   await loadSulitMeals();
@@ -6043,6 +6073,96 @@ async function loadTopRestaurants() {
   }
 }
 
+// ================= LOAD ALL RESTAURANTS =================
+async function loadAllRestaurants() {
+  const container = document.getElementById('allRestaurantsContainer');
+  const skeleton = document.getElementById('allRestaurantsSkeleton');
+  if (!container) return;
+
+  try {
+    const vendorsSnapshot = await db.collection("vendors")
+      .where("reststatus", "==", true)
+      .get();
+
+    if (skeleton) skeleton.remove();
+
+    if (vendorsSnapshot.empty) {
+      container.innerHTML = `
+        <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
+          <i class="fas fa-store fa-2x" style="color: var(--gray-light); margin-bottom: 15px;"></i>
+          <h3 style="color: var(--secondary); margin-bottom: 8px;">No restaurants found</h3>
+          <p style="color: var(--gray);">Check back later for new restaurants.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const vendors = [];
+    vendorsSnapshot.forEach(doc => {
+      vendors.push({ id: doc.id, ...doc.data() });
+    });
+
+    container.innerHTML = '';
+    vendors.forEach(vendor => {
+      const wrap = document.createElement('div');
+      wrap.className = 'all-restaurants-card-wrap';
+      if (vendor.isOpen === false) wrap.classList.add('closed');
+
+      const reviewsCount = vendor.reviewsCount || 0;
+      const reviewsSum = vendor.reviewsSum || 0;
+      const rating = reviewsCount > 0
+        ? (reviewsSum / reviewsCount).toFixed(1)
+        : '0.0';
+      const photo = vendor.photo || vendor.logo ||
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+      const title = vendor.title || 'Restaurant';
+      const category = vendor.categoryTitle || vendor.category || 'Restaurant';
+      const isOpen = vendor.isOpen !== false;
+      const nextOpenAt = vendor.nextOpenAt || '';
+
+      let overlayHTML = '';
+      if (!isOpen) {
+        overlayHTML = `
+          <div class="all-restaurants-closed-overlay">
+            <strong>Temporarily Closed</strong>
+            ${nextOpenAt ? `<span>${nextOpenAt}</span>` : ''}
+          </div>
+        `;
+      }
+
+      wrap.innerHTML = `
+        ${overlayHTML}
+        <a href="users/vendor.php?id=${vendor.id}" class="all-restaurants-card-link" style="display: block; text-decoration: none; color: inherit;">
+          <div class="restaurant-image-wrapper" style="margin-top: 12px;">
+            <img src="${photo}" alt="${title}" class="restaurant-profile-pic" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+          </div>
+          <div class="restaurant-body">
+            <div class="restaurant-name">${title}</div>
+            <div class="restaurant-meta">${category}</div>
+            <span class="open-badge ${isOpen ? 'open' : 'closed'}">${isOpen ? 'Open' : 'Closed'}</span>
+            <div class="restaurant-rating">
+              <div class="rating-stars">${generateStarRating(parseFloat(rating))}</div>
+              <span class="rating-value">${rating}</span>
+              <span class="rating-count">(${reviewsCount})</span>
+            </div>
+          </div>
+        </a>
+      `;
+      container.appendChild(wrap);
+    });
+  } catch (error) {
+    console.error('Error loading all restaurants:', error);
+    if (skeleton) skeleton.remove();
+    container.innerHTML = `
+      <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
+        <i class="fas fa-exclamation-circle fa-2x" style="color: var(--gray-light); margin-bottom: 15px;"></i>
+        <h3 style="color: var(--secondary); margin-bottom: 8px;">Error loading restaurants</h3>
+        <p style="color: var(--gray);">Please try again later.</p>
+      </div>
+    `;
+  }
+}
 
 // ================= CREATE RESTAURANT CARD =================
 async function createRestaurantCard(restaurant, container, type) {
@@ -6330,9 +6450,6 @@ async function loadAllSections() {
   // Load categories from Firebase
   await loadCategories();
   
-  // Load nearby foods
-  await loadNearbyFoods();
-  
   // Load sulit meals
   await loadSulitMeals();
   
@@ -6341,6 +6458,9 @@ async function loadAllSections() {
   
   // Load user favorites
   await loadUserFavorites();
+  
+  // Load all restaurants (below Sulit Meals)
+  await loadAllRestaurants();
 }
 
 // ================= UPDATE INITIALIZATION =================
@@ -6593,28 +6713,6 @@ function initializeRandomSwiper() {
   });
 }
 
-function initializeNearbySwiper() {
-  nearbySwiper = new Swiper('.mySwiperNearby', {
-    slidesPerView: 'auto',
-    spaceBetween: 15,
-    centeredSlides: false,
-    loop: false,
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    },
-    breakpoints: {
-      320: { slidesPerView: 1.1, spaceBetween: 10 },
-      480: { slidesPerView: 1.3, spaceBetween: 10 },
-      640: { slidesPerView: 1.8, spaceBetween: 12 },
-      768: { slidesPerView: 2.2, spaceBetween: 12 },
-      1024: { slidesPerView: 2.8, spaceBetween: 15 },
-      1200: { slidesPerView: 3.2, spaceBetween: 15 },
-      1400: { slidesPerView: 3.5, spaceBetween: 15 }
-    }
-  });
-}
-
 function initializeSulitSwiper() {
   sulitSwiper = new Swiper('.mySwiperSulit', {
     slidesPerView: 'auto',
@@ -6728,104 +6826,6 @@ async function createFoodSlide(food, restaurantDetails, distance, container, typ
   container.appendChild(slide);
 }
 
-// ================= CREATE COMPACT NEARBY FOOD SLIDE =================
-async function createCompactNearbySlide(food, restaurantDetails, distance, container) {
-  // Get product rating
-  const ratingData = getProductRating(food);
-  const rating = ratingData.average;
-  const reviewsCount = ratingData.count;
-  
-  // Handle price safely
-  let price = 0;
-  let originalPrice = null;
-  
-  try {
-    const disPrice = parseFloat(food.disPrice);
-    const regPrice = parseFloat(food.price);
-    
-    if (!isNaN(disPrice) && disPrice > 0 && disPrice < regPrice) {
-      price = disPrice;
-      originalPrice = regPrice;
-    } else if (!isNaN(regPrice)) {
-      price = regPrice;
-    }
-  } catch (e) {
-    console.warn(`Error parsing price for ${food.id}`);
-    price = 0;
-  }
-  
-  // Format distance
-  let distanceText = '';
-  if (distance !== null && distance !== undefined) {
-    if (distance < 1) {
-      distanceText = `${(distance * 1000).toFixed(0)}m`;
-    } else {
-      distanceText = `${distance.toFixed(1)}km`;
-    }
-  }
-  
-  // Truncate description to ~5 words
-  let description = food.description || 'Delicious food item';
-  const words = description.split(' ');
-  if (words.length > 5) {
-    description = words.slice(0, 5).join(' ') + '...';
-  }
-  
-  // Generate single star
-  const productStarsHTML = generateSingleStarHTML();
-  
-  const slide = document.createElement("div");
-  slide.className = "swiper-slide swiper-nearby-slide";
-  
-  const card = document.createElement("a");
-  card.href = `foods/product.php?id=${food.id}`;
-  card.className = "nearby-food-compact";
-  card.setAttribute('data-product', food.id);
-  card.style.animation = 'fadeIn 0.5s ease forwards';
-
-  card.innerHTML = `
-    <div class="nearby-food-image">
-      <img src="${food.photo || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" 
-           loading="lazy" alt="${food.name || 'Food item'}"
-           onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
-      ${distanceText ? `<div class="nearby-distance-badge">${distanceText}</div>` : ''}
-      <div class="nearby-restaurant-avatar">
-        <img src="${restaurantDetails.logo}" 
-             alt="${restaurantDetails.name}"
-             onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'">
-      </div>
-    </div>
-    
-    <div class="nearby-food-content">
-      <div class="nearby-food-header">
-        <div class="nearby-food-name">${food.name || 'Unnamed Item'}</div>
-        <div class="nearby-food-restaurant">
-          <i class="fas fa-store"></i>
-          <span>${restaurantDetails.name}</span>
-        </div>
-      </div>
-      
-      <div class="nearby-food-description truncate-description">${description}</div>
-      
-      <div class="nearby-food-rating">
-        <div class="rating-stars">${productStarsHTML}</div>
-        <span class="rating-value">${rating}</span>
-        <span class="rating-count">(${reviewsCount})</span>
-      </div>
-      
-      <div class="nearby-food-price-section">
-        <div class="nearby-food-price">
-          ₱${price.toFixed(2)}
-          ${originalPrice ? `<span class="original-price">₱${originalPrice.toFixed(2)}</span>` : ''}
-        </div>
-      </div>
-    </div>
-  `;
-
-  slide.appendChild(card);
-  container.appendChild(slide);
-}
-
 // ================= GET PRODUCT RATING =================
 function getProductRating(food) {
   // Try different possible locations for rating data
@@ -6908,67 +6908,6 @@ function showNoRandomResults(message = "No random picks available") {
   }
 }
 
-// ================= SHOW NO NEARBY RESULTS =================
-function showNoNearbyResults(message = null) {
-  const nearbySwiperWrapper = document.getElementById('nearbySwiperWrapper');
-  if (!nearbySwiperWrapper) return;
-  
-  <?php if ($isLoggedIn): ?>
-  let specificMessage = message || "No nearby foods found";
-  let specificDetail = "Try changing your location or check back later";
-  
-  if (!userLocation.latitude) {
-    specificMessage = "Set your location to see nearby foods";
-    specificDetail = "Click 'Set Location' or add an address in your profile";
-  }
-  
-  nearbySwiperWrapper.innerHTML = `
-    <div class="swiper-slide" style="width: 100%;">
-      <div class="no-results" style="width: 100%; padding: 40px 20px; text-align: center;">
-        <i class="fas fa-map-marker-alt fa-3x" style="color: var(--gray-light); margin-bottom: 20px;"></i>
-        <h3 style="color: var(--secondary); margin-bottom: 10px; font-size: 1.3rem;">${specificMessage}</h3>
-        <p style="color: var(--gray); margin-bottom: 25px; font-size: 0.95rem; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.5;">${specificDetail}</p>
-        ${!userLocation.latitude ? `
-          <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; justify-content: center; align-items: center;">
-            <button class="set-location-btn" onclick="showLocationModal()">
-              <i class="fas fa-crosshairs"></i> Set Current Location
-            </button>
-            <button class="set-location-btn" onclick="goToProfileLocationSettings()" style="background: var(--success);">
-              <i class="fas fa-user"></i> Use Profile Address
-            </button>
-          </div>
-        ` : ''}
-      </div>
-    </div>
-  `;
-  <?php else: ?>
-  nearbySwiperWrapper.innerHTML = `
-    <div class="swiper-slide" style="width: 100%;">
-      <div class="auth-prompt" style="margin: 20px;">
-        <div class="auth-prompt-content">
-          <i class="fas fa-map-marker-alt fa-3x"></i>
-          <h3>Discover restaurants near you</h3>
-          <p>Login or register to set your location and see nearby restaurants</p>
-          <div class="auth-prompt-buttons">
-            <a href="login.php" class="auth-prompt-btn login">
-              <i class="fas fa-sign-in-alt"></i> Login
-            </a>
-            <a href="register.php" class="auth-prompt-btn register">
-              <i class="fas fa-user-plus"></i> Register
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  <?php endif; ?>
-  
-
-  if (nearbySwiper) {
-    nearbySwiper.update();
-  }
-}
-
 function showNoSulitResults(message = null) {
   const sulitSwiperWrapper = document.getElementById('sulitSwiperWrapper');
   if (!sulitSwiperWrapper) return;
@@ -7015,86 +6954,6 @@ function showNoSulitResults(message = null) {
 
 // ================= SETUP REFRESH BUTTONS =================
 function setupRefreshButtons() {
-  // Nearby refresh button
-  const refreshNearbyBtn = document.getElementById('refreshNearby');
-  if (refreshNearbyBtn) {
-    refreshNearbyBtn.addEventListener('click', async function() {
-      const originalHTML = refreshNearbyBtn.innerHTML;
-      refreshNearbyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-      refreshNearbyBtn.disabled = true;
-      
-      // Clear restaurant cache
-      restaurantCache = {};
-      
-      await loadNearbyFoods();
-      
-      refreshNearbyBtn.innerHTML = originalHTML;
-      refreshNearbyBtn.disabled = false;
-      
-      showNotification('Nearby foods refreshed!', 'success');
-    });
-  }
-  
-  // Random refresh button
-  const refreshRandomBtn = document.getElementById('refreshRandom');
-  if (refreshRandomBtn) {
-    refreshRandomBtn.addEventListener('click', async function() {
-      const originalHTML = refreshRandomBtn.innerHTML;
-      refreshRandomBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-      refreshRandomBtn.disabled = true;
-      
-      // Clear restaurant cache
-      restaurantCache = {};
-      
-      await loadRandomFoods();
-      
-      refreshRandomBtn.innerHTML = originalHTML;
-      refreshRandomBtn.disabled = false;
-      
-      showNotification('Random picks refreshed!', 'success');
-    });
-  }
-  
-  // Recommended refresh button
-  const refreshRecommendedBtn = document.getElementById('refreshRecommended');
-  if (refreshRecommendedBtn) {
-    refreshRecommendedBtn.addEventListener('click', async function() {
-      const originalHTML = refreshRecommendedBtn.innerHTML;
-      refreshRecommendedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-      refreshRecommendedBtn.disabled = true;
-      
-      // Clear restaurant cache
-      restaurantCache = {};
-      
-      await loadRecommendedFoods();
-      
-      refreshRecommendedBtn.innerHTML = originalHTML;
-      refreshRecommendedBtn.disabled = false;
-      
-      showNotification('Recommendations refreshed!', 'success');
-    });
-  }
-  
-  // Sulit meals refresh button (if you have one, otherwise add it to your HTML)
-  const refreshSulitBtn = document.getElementById('refreshSulit');
-  if (refreshSulitBtn) {
-    refreshSulitBtn.addEventListener('click', async function() {
-      const originalHTML = refreshSulitBtn.innerHTML;
-      refreshSulitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-      refreshSulitBtn.disabled = true;
-      
-      // Clear restaurant cache
-      restaurantCache = {};
-      
-      await loadSulitMeals();
-      
-      refreshSulitBtn.innerHTML = originalHTML;
-      refreshSulitBtn.disabled = false;
-      
-      showNotification('Sulit meals refreshed!', 'success');
-    });
-  }
-  
   // Nearby restaurants refresh button
   const refreshNearbyRestaurantsBtn = document.getElementById('refreshNearbyRestaurants');
   if (refreshNearbyRestaurantsBtn) {
@@ -7139,10 +6998,8 @@ function setupRefreshButtons() {
   document.addEventListener('locationUpdated', function() {
     console.log('Location updated, refreshing restaurant sections...');
     
-    // Refresh nearby restaurants when location changes
     if (userLocation.latitude && userLocation.longitude) {
       loadNearbyRestaurants();
-      loadNearbyFoods(); // Also refresh nearby foods
     }
   });
   
@@ -7172,154 +7029,24 @@ document.addEventListener('DOMContentLoaded', async function() {
   console.log('LalaGO initialized');
 });
 
-// ================= LOAD NEARBY FOODS =================
-async function loadNearbyFoods() {
-  console.log('Loading nearby foods...');
-  const nearbySwiperWrapper = document.getElementById('nearbySwiperWrapper');
-  
-  if (!nearbySwiperWrapper) {
-    console.error('Nearby swiper wrapper not found!');
-    return;
-  }
-  
-  // Show loading state with compact style
-  nearbySwiperWrapper.innerHTML = `
-    <div class="swiper-slide" style="width: 100%;">
-      <div style="display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
-        <div style="text-align: center;">
-          <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary); margin-bottom: 15px;"></i>
-          <h3 style="color: var(--secondary); margin-bottom: 8px;">Finding nearby foods...</h3>
-          <p style="color: var(--gray);">Searching within ${MAX_DISTANCE_KM}km of your location</p>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  // Check if location is available
-  if (!userLocation.latitude || !userLocation.longitude) {
-    showNoNearbyResults();
-    return;
-  }
-  
-  try {
-    // Get all published products
-    const productsSnapshot = await db.collection("vendor_products")
-      .where("publish", "==", true)
-      .limit(100)
-      .get();
-    
-    console.log(`Found ${productsSnapshot.size} total products`);
-    
-    if (productsSnapshot.empty) {
-      showNoNearbyResults();
-      return;
-    }
-    
-    // Convert to array
-    const allProducts = [];
-    productsSnapshot.forEach(doc => {
-      allProducts.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
-    
-    // Get restaurant locations for each product
-    const productsWithDistance = [];
-    
-    for (const product of allProducts) {
-      try {
-        const restaurantDetails = await fetchRestaurantDetails(product.vendorID);
-        
-        // Check if restaurant has location
-        if (restaurantDetails.latitude && restaurantDetails.longitude) {
-          const distance = calculateDistance(
-            userLocation.latitude,
-            userLocation.longitude,
-            restaurantDetails.latitude,
-            restaurantDetails.longitude
-          );
-          
-          if (distance <= MAX_DISTANCE_KM) {
-            productsWithDistance.push({
-              ...product,
-              distance: distance,
-              restaurantDetails: restaurantDetails
-            });
-          }
-        } else {
-          console.log(`Restaurant ${restaurantDetails.name} has no location data`);
-        }
-      } catch (error) {
-        console.error("Error processing product:", error);
-      }
-    }
-    
-    // Sort by distance
-    productsWithDistance.sort((a, b) => a.distance - b.distance);
-    
-    // Take nearest products
-    nearbyProducts = productsWithDistance.slice(0, Math.min(NEARBY_LIMIT, productsWithDistance.length));
-    
-    console.log(`Found ${productsWithDistance.length} products within ${MAX_DISTANCE_KM}km`);
-    
-    // Clear container
-    nearbySwiperWrapper.innerHTML = '';
-    
-    if (nearbyProducts.length === 0) {
-      showNoNearbyResults("No restaurants found near your location");
-      return;
-    }
-    
-    // Display nearby products in compact layout
-    for (const product of nearbyProducts) {
-      let restaurantDetails;
-      
-      if (product.restaurantDetails) {
-        restaurantDetails = product.restaurantDetails;
-      } else {
-        restaurantDetails = await fetchRestaurantDetails(product.vendorID);
-      }
-      
-      // Use the new compact slide function for nearby foods
-      await createCompactNearbySlide(product, restaurantDetails, product.distance, nearbySwiperWrapper);
-    }
-    
-    // Initialize or update Swiper
-    if (!nearbySwiper) {
-      initializeNearbySwiper();
-    } else {
-      nearbySwiper.update();
-    }
-    
-    console.log(`Displayed ${nearbyProducts.length} nearby products in compact layout`);
-    
-  } catch (error) {
-    console.error("Error loading nearby foods:", error);
-    showNoNearbyResults("Error loading nearby foods");
-  }
-}
 // ================= LOAD CATEGORIES FROM FIREBASE =================
 async function loadCategories() {
   try {
     const categoriesSnapshot = await db.collection("vendor_categories")
       .where("publish", "==", true)
-      .orderBy("name")
       .get();
     
     const categories = [];
     
     if (!categoriesSnapshot.empty) {
+      const raw = [];
       categoriesSnapshot.forEach(doc => {
-        const category = doc.data();
-        categories.push({
-          id: doc.id,
-          name: category.name || "Unnamed Category",
-          icon: getCategoryIcon(category.name),
-          count: 0,
-          active: false
-        });
+        const d = doc.data();
+        const name = d.name || d.title || "Unnamed Category";
+        raw.push({ id: doc.id, name, icon: getCategoryIcon(name), count: 0, active: false });
       });
+      raw.sort((a, b) => a.name.localeCompare(b.name));
+      categories.push(...raw);
     } else {
       // Use sample categories if Firebase has none
       const sampleCategories = [
@@ -7364,7 +7091,6 @@ async function loadFoodCategoriesFromDatabase() {
         
         const categoriesSnapshot = await db.collection("vendor_categories")
             .where("publish", "==", true)
-            .orderBy("name")
             .get();
         
         if (categoriesSnapshot.empty) {
@@ -7378,20 +7104,22 @@ async function loadFoodCategoriesFromDatabase() {
         categoryIconsCache = {};
         
         categoriesSnapshot.forEach(doc => {
+            const d = doc.data();
+            const name = d.name || d.title || "Unnamed Category";
             const category = {
                 id: doc.id,
-                name: doc.data().name || "Unnamed Category",
-                photo: doc.data().photo || null,
-                description: doc.data().description || "",
-                publish: doc.data().publish || false,
-                // Try to get fallback icon based on category name
-                fallbackIcon: getCategoryIconByCategoryName(doc.data().name)
+                name,
+                photo: d.photo || null,
+                description: d.description || "",
+                publish: d.publish || false,
+                fallbackIcon: getCategoryIconByCategoryName(name)
             };
             
-            // Cache the category
-            categoryIconsCache[category.name.toLowerCase()] = category.photo || category.fallbackIcon;
+            categoryIconsCache[category.name.toLowerCase()] =
+                category.photo || category.fallbackIcon;
             foodCategoriesFromDB.push(category);
         });
+        foodCategoriesFromDB.sort((a, b) => a.name.localeCompare(b.name));
         
         console.log(`Loaded ${foodCategoriesFromDB.length} categories from database`);
         
@@ -7611,20 +7339,6 @@ function renderFoodCategoryIcons() {
 
 // Helper function to show loading state for all sections
 function showLoadingForAllSections(categoryName) {
-    // Nearby section
-    const nearbySwiperWrapper = document.getElementById('nearbySwiperWrapper');
-    if (nearbySwiperWrapper) {
-        nearbySwiperWrapper.innerHTML = `
-            <div class="swiper-slide" style="width: 100%;">
-                <div class="no-results" style="width: 100%;">
-                    <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <h3>Loading ${categoryName} foods...</h3>
-                    <p>Filtering nearby foods by category</p>
-                </div>
-            </div>
-        `;
-    }
-    
     // Random section
     const randomSwiperWrapper = document.getElementById('randomSwiperWrapper');
     if (randomSwiperWrapper) {
@@ -7670,20 +7384,6 @@ function showLoadingForAllSections(categoryName) {
 
 // Helper function to show no results for all sections
 function showNoResultsInAllSections(message) {
-    // Nearby section
-    const nearbySwiperWrapper = document.getElementById('nearbySwiperWrapper');
-    if (nearbySwiperWrapper) {
-        nearbySwiperWrapper.innerHTML = `
-            <div class="swiper-slide" style="width: 100%;">
-                <div class="no-results" style="width: 100%;">
-                    <i class="fas fa-search"></i>
-                    <h3>${message}</h3>
-                    <p>Try a different category or clear the filter</p>
-                </div>
-            </div>
-        `;
-    }
-    
     // Random section
     const randomSwiperWrapper = document.getElementById('randomSwiperWrapper');
     if (randomSwiperWrapper) {
@@ -7729,60 +7429,6 @@ function showNoResultsInAllSections(message) {
 
 // Function to process filtered products for all sections
 async function processFilteredProductsForAllSections(filteredProducts, categoryName) {
-    // Process for nearby section
-    const nearbySwiperWrapper = document.getElementById('nearbySwiperWrapper');
-    if (nearbySwiperWrapper) {
-        nearbySwiperWrapper.innerHTML = '';
-        
-        // Filter nearby products by location
-        const nearbyFilteredProducts = [];
-        for (const product of filteredProducts) {
-            try {
-                const restaurantDetails = await fetchRestaurantDetails(product.vendorID);
-                
-                // Check if restaurant has location and is nearby
-                if (restaurantDetails.latitude && restaurantDetails.longitude && userLocation.latitude && userLocation.longitude) {
-                    const distance = calculateDistance(
-                        userLocation.latitude,
-                        userLocation.longitude,
-                        restaurantDetails.latitude,
-                        restaurantDetails.longitude
-                    );
-                    
-                    if (distance <= MAX_DISTANCE_KM) {
-                        nearbyFilteredProducts.push({...product, distance, restaurantDetails});
-                    }
-                }
-            } catch (error) {
-                console.error("Error processing product for nearby:", error);
-            }
-        }
-        
-        // Sort by distance
-        nearbyFilteredProducts.sort((a, b) => (a.distance || 999) - (b.distance || 999));
-        
-        // Take nearest products
-        const nearbyDisplayProducts = nearbyFilteredProducts.slice(0, NEARBY_LIMIT);
-        
-        if (nearbyDisplayProducts.length > 0) {
-            for (const product of nearbyDisplayProducts) {
-                await createCompactNearbySlide(product, product.restaurantDetails, product.distance, nearbySwiperWrapper);
-            }
-        } else {
-            nearbySwiperWrapper.innerHTML = `
-                <div class="swiper-slide" style="width: 100%;">
-                    <div class="no-results" style="width: 100%;">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <h3>No ${categoryName} foods nearby</h3>
-                        <p>Try a different location or category</p>
-                    </div>
-                </div>
-            `;
-        }
-        
-        if (nearbySwiper) nearbySwiper.update();
-    }
-    
     // Process for random section
     const randomSwiperWrapper = document.getElementById('randomSwiperWrapper');
     if (randomSwiperWrapper) {
