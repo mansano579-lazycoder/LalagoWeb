@@ -7304,22 +7304,19 @@ async function loadCategories() {
   try {
     const categoriesSnapshot = await db.collection("vendor_categories")
       .where("publish", "==", true)
-      .orderBy("name")
       .get();
     
     const categories = [];
     
     if (!categoriesSnapshot.empty) {
+      const raw = [];
       categoriesSnapshot.forEach(doc => {
-        const category = doc.data();
-        categories.push({
-          id: doc.id,
-          name: category.name || "Unnamed Category",
-          icon: getCategoryIcon(category.name),
-          count: 0,
-          active: false
-        });
+        const d = doc.data();
+        const name = d.name || d.title || "Unnamed Category";
+        raw.push({ id: doc.id, name, icon: getCategoryIcon(name), count: 0, active: false });
       });
+      raw.sort((a, b) => a.name.localeCompare(b.name));
+      categories.push(...raw);
     } else {
       // Use sample categories if Firebase has none
       const sampleCategories = [
@@ -7364,7 +7361,6 @@ async function loadFoodCategoriesFromDatabase() {
         
         const categoriesSnapshot = await db.collection("vendor_categories")
             .where("publish", "==", true)
-            .orderBy("name")
             .get();
         
         if (categoriesSnapshot.empty) {
@@ -7378,20 +7374,22 @@ async function loadFoodCategoriesFromDatabase() {
         categoryIconsCache = {};
         
         categoriesSnapshot.forEach(doc => {
+            const d = doc.data();
+            const name = d.name || d.title || "Unnamed Category";
             const category = {
                 id: doc.id,
-                name: doc.data().name || "Unnamed Category",
-                photo: doc.data().photo || null,
-                description: doc.data().description || "",
-                publish: doc.data().publish || false,
-                // Try to get fallback icon based on category name
-                fallbackIcon: getCategoryIconByCategoryName(doc.data().name)
+                name,
+                photo: d.photo || null,
+                description: d.description || "",
+                publish: d.publish || false,
+                fallbackIcon: getCategoryIconByCategoryName(name)
             };
             
-            // Cache the category
-            categoryIconsCache[category.name.toLowerCase()] = category.photo || category.fallbackIcon;
+            categoryIconsCache[category.name.toLowerCase()] =
+                category.photo || category.fallbackIcon;
             foodCategoriesFromDB.push(category);
         });
+        foodCategoriesFromDB.sort((a, b) => a.name.localeCompare(b.name));
         
         console.log(`Loaded ${foodCategoriesFromDB.length} categories from database`);
         

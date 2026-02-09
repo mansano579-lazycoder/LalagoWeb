@@ -1,13 +1,11 @@
-const categoriesContainer = document.getElementById("categoriesContainer");
+function initVendorCategories() {
+  const categoriesContainer = document.getElementById("categoriesContainer");
+  if (!categoriesContainer) return;
+  if (typeof db === "undefined") return;
 
-if (!categoriesContainer) {
-  console.error("categoriesContainer not found");
-} else {
+  const categoryCounts = {};
+  const categoryPhotos = {};
 
-  const categoryCounts = {};   // categoryID => count
-  const categoryPhotos = {};  // categoryID => { title, photo }
-
-  // 1️⃣ LOAD VENDORS (COUNT PER CATEGORY)
   db.collection("vendors")
     .where("reststatus", "==", true)
     .get()
@@ -51,8 +49,9 @@ if (!categoriesContainer) {
         // ❌ Skip categories WITHOUT restaurants
         if (!categoryCounts[catID]) return;
 
+        const title = (c.title || c.name || "").trim() || categoryCounts[catID].title;
         categoryPhotos[catID] = {
-          title: c.title?.trim() || categoryCounts[catID].title,
+          title,
           photo: c.photo || "https://via.placeholder.com/100",
           count: categoryCounts[catID].count
         };
@@ -92,5 +91,10 @@ if (!categoriesContainer) {
       console.error(err);
       categoriesContainer.innerHTML = "<p>Error loading categories.</p>";
     });
+}
 
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initVendorCategories);
+} else {
+  initVendorCategories();
 }
